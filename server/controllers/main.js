@@ -1,4 +1,5 @@
 let PPMvalue = 0;
+let Buzzer;
 
 // ! @route POST api/update_ppm_value
 // ! @desc Updates the PPM value from Arduino to Web
@@ -38,22 +39,53 @@ const get_ppm_value = (req, res) => {
     console.log(error);
     return res.status(500).json({ error });
   }
-}
+};
 
-// ! @route POST api/stop_buzzer
-// ! @desc Updates the PPM value from Arduino to Web
+// ! @route POST api/toggle_buzzer
+// ! @desc Toggles whether the alarm is enabled or disabled
 // ! @access public
 
-const stop_buzzer = (req, res) => {
+const toggle_buzzer = (req, res) => {
   try {
-    /*
-        ...
-    */
-        return res.status(200).json({ success: true });
+    // We need to identify the request's body.
+    const { Toggle } = req.body;
+
+    // We check if the value has been sent.
+    // if (!Toggle) {
+    //   return res
+    //     .status(500)
+    //     .json({ message: "You must provide wheter the buzzer is active or not" });
+    // }
+
+    Buzzer = Toggle;
+
+    console.log("[PING] Toggle Buzzer has been utilised");
+    return res.status(200).json({ success: true, toggle: Toggle });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error });
   }
 };
 
-export { update_ppm_value, get_ppm_value, stop_buzzer };
+// ! @route POST api/get_buzzer_status
+// ! @desc Determines whether the alarm is enabled or disabled
+// ! @access public
+
+const get_buzzer_status = (req, res) => {
+  try {
+    if(!Buzzer) {
+      if(PPMvalue >= 1000) {
+        Buzzer = true;
+      } else {
+        Buzzer = false;
+      }
+    }
+    console.log("[PING] Get Buzzer Status has been utilised");
+    return res.status(200).json({ success: true, value: Buzzer });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error });
+  }
+};
+
+export { update_ppm_value, get_ppm_value, toggle_buzzer, get_buzzer_status };
